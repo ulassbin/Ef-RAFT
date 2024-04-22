@@ -1,6 +1,9 @@
 from __future__ import print_function, division
 import sys
-sys.path.append('core')
+current_dir = os.path.dirname(__file__)
+
+# Append the desired directory to sys.path
+sys.path.append(os.path.join(current_dir, 'core'))
 
 import argparse
 import os
