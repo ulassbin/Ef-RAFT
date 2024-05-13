@@ -45,7 +45,6 @@ def to_image(flo):
 def viz(img, flo):
     img = img[0].permute(1,2,0).cpu().numpy()
     flo = flo[0].permute(1,2,0).cpu().numpy()
-    
     # map flow to rgb image
     flo = flow_viz.flow_to_image(flo)
     img_flo = np.concatenate([img, flo], axis=1)
@@ -132,9 +131,9 @@ def processVid(args, path, model): # This produces one less frame for some reaso
         print("Error: Unable to open video file: ", path)
         cap.release()
         return flow_frames, False
-    ret, old_frame = cap.read()
-    flow_frames.append(create_blank_image_like(old_frame))
-    while True:
+    ret, old_frame = cap.read() # 1 read, 1 append?
+    flow_frames.append(create_blank_image_like(old_frame)) # + 1 appended here.
+    while True: # create flow from, t+1 and t
         ret, frame = cap.read()
         if not ret:
             print("End of vid...")
@@ -147,7 +146,7 @@ def processVid(args, path, model): # This produces one less frame for some reaso
         flow_frame = to_image(flow_up)
         flow_frames.append(flow_frame)
         old_frame = copy.deepcopy(frame) # Update the frames...
-        #viz(image1pad, flow_up)
+        #viz(image1pad, flow_up))
     print(color.Fore.BLUE + "Written {}".format(iter) + color.Style.RESET_ALL)
     cap.release()
     return flow_frames, True
@@ -215,13 +214,6 @@ def run(args):
 
     base_path = args.path # Path for video sources...
 
-   # cap = cv2.VideoCapture(0)
-
-    #if not cap.isOpened():
-    #    print("Error: Unable to open video file")
-    #    return
-
-   # ret, old_frame = cap.read()
     with torch.no_grad():
         print("Base path is ", base_path)
         folder = os.fsencode(base_path)
@@ -240,6 +232,7 @@ def run(args):
                     #compare_video_lengths(vid_file, len(frames))
                     if(ret):
                         saveFlow(frames, save_dir, vid_name)
+                        print("RGB {}, flow {}".format(get_video_length_raw(vid_file), get_video_length_raw(save_dir +"/"+vid_name))) 
                     else:
                         print("Unable to get flow frames")
                     model.eval()
