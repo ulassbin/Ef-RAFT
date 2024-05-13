@@ -45,7 +45,6 @@ def to_image(flo):
 def viz(img, flo):
     img = img[0].permute(1,2,0).cpu().numpy()
     flo = flo[0].permute(1,2,0).cpu().numpy()
-    
     # map flow to rgb image
     flo = flow_viz.flow_to_image(flo)
     img_flo = np.concatenate([img, flo], axis=1)
