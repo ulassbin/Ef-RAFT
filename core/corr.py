@@ -79,6 +79,11 @@ class AlternateCorrBlock:
         self.num_levels = num_levels
         self.radius = radius
 
+        corr = CorrBlock.corr(fmap1, fmap2)
+        batch, h1, w1, dim, h2, w2 = corr.shape
+        self.corr_map = corr.view(batch, h1 * w1, h2 * w2)
+
+
         self.pyramid = [(fmap1, fmap2)]
         for i in range(self.num_levels):
             fmap1 = F.avg_pool2d(fmap1, 2, stride=2)
