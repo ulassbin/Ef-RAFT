@@ -43,7 +43,7 @@ class RAFT(nn.Module):
 
         if 'alternate_corr' not in self.args:
             self.args.alternate_corr = False
-
+        print('Using Efficient Correlation Implementation:', self.args.alternate_corr)
         # feature network, context network, and update block
         if args.small:
             self.fnet = SmallEncoder(output_dim=128, norm_fn='instance', dropout=args.dropout)        

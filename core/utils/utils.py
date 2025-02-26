@@ -80,3 +80,31 @@ def coords_grid(batch, ht, wd, device):
 def upflow8(flow, mode='bilinear'):
     new_size = (8 * flow.shape[2], 8 * flow.shape[3])
     return  8 * F.interpolate(flow, size=new_size, mode=mode, align_corners=True)
+
+
+
+class InputPadder2:
+    """ Pads images such that dimensions are divisible by 8 """
+    def __init__(self, dims, mode='sintel'):
+        self.ht, self.wd = dims[-2:]  # Get height and width
+        # Force height and width to be divisible by 8
+        new_ht = (self.ht // 8) * 8
+        new_wd = (self.wd // 8) * 8
+
+        self.pad_ht = new_ht - self.ht
+        self.pad_wd = new_wd - self.wd
+
+        if mode == 'sintel':
+            self._pad = [self.pad_wd // 2, self.pad_wd - self.pad_wd // 2, self.pad_ht // 2, self.pad_ht - self.pad_ht // 2]
+        else:
+            self._pad = [self.pad_wd // 2, self.pad_wd - self.pad_wd // 2, 0, self.pad_ht]
+
+    def pad(self, *inputs):
+        """ Pads all input tensors in a batch-compatible way """
+        return [F.pad(x, self._pad, mode='replicate') for x in inputs]
+
+    def unpad(self, x):
+        """ Removes padding after processing """
+        ht, wd = x.shape[-2:]
+        c = [self._pad[2], ht - self._pad[3], self._pad[0], wd - self._pad[1]]
+        return x[..., c[0]:c[1], c[2]:c[3]]
